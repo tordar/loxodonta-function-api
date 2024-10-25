@@ -39,9 +39,9 @@ export default function Home() {
                 You can make GET requests to the endpoints listed above. For example:
               </p>
               <pre className="bg-muted p-2 rounded mt-2 overflow-x-auto">
-              fetch('https://loxodonta-function-api.vercel.app/api/hello')
-                .then(response => response.json())
-                .then(data => console.log(data))
+              fetch(&apos;https://loxodonta-function-api.vercel.app/api/hello&apos;)
+                .then(response =&gt; response.json())
+                .then(data =&gt; console.log(data))
             </pre>
             </section>
             <section>
