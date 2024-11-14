@@ -91,14 +91,26 @@ export async function GET() {
 
         if (tracks.length === 0) {
             console.log('No tracks found on this page');
-            return NextResponse.json({ error: 'No tracks found' }, { status: 404 });
+            return new NextResponse(JSON.stringify({ error: 'No tracks found' }), {
+                status: 404,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            });
         }
 
         const randomTrack = tracks[Math.floor(Math.random() * tracks.length)].track;
 
         if (!randomTrack) {
             console.error('Failed to get track information');
-            return NextResponse.json({ error: 'Failed to get track information' }, { status: 500 });
+            return new NextResponse(JSON.stringify({ error: 'Failed to get track information' }), {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            });
         }
 
         const songInfo = {
@@ -111,12 +123,35 @@ export async function GET() {
         };
 
         console.log('Successfully fetched random song:', songInfo.name);
-        return NextResponse.json(songInfo);
+        return new NextResponse(JSON.stringify(songInfo), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     } catch (error) {
         console.error('Error in GET /api/random-song:', error);
-        if (error instanceof Error) {
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-        return NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 });
+        return new NextResponse(
+            JSON.stringify({ error: error instanceof Error ? error.message : 'An unknown error occurred' }),
+            {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            }
+        );
     }
+}
+
+export async function OPTIONS(request: Request) {
+    return new NextResponse(null, {
+        status: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+    });
 }
