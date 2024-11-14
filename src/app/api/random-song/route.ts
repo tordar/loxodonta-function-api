@@ -44,58 +44,56 @@ async function getAccessToken() {
     });
 
     const data = await response.json();
-    if (data.error) {
+    if ('error' in data) {
         throw new Error(`Failed to get access token: ${data.error}`);
     }
 
     return data.access_token;
 }
 
+async function getRandomPlaylistPage(accessToken: string, playlistId: string, totalTracks: number): Promise<PlaylistTrack[]> {
+    const pageSize = 100;
+    const totalPages = Math.ceil(totalTracks / pageSize);
+    const randomPage = Math.floor(Math.random() * totalPages) + 1;
+    const offset = (randomPage - 1) * pageSize;
 
-async function getAllPlaylistTracks(accessToken: string, playlistId: string) {
-    let tracks: PlaylistTrack[] = [];
-    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+    const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${pageSize}&offset=${offset}`;
 
-    while (url) {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+        },
+    });
 
-        const data = await response.json();
-        if (data.error) {
-            throw new Error(`Failed to get playlist tracks: ${data.error.message}`);
-        }
-
-        tracks = tracks.concat(data.items);
-        url = data.next;
+    const data = await response.json();
+    if ('error' in data) {
+        throw new Error(`Failed to get playlist tracks: ${data.error.message}`);
     }
-
-    return tracks;
+    console.log(`Page fetched: ${randomPage}`);
+    return data.items;
 }
-
 
 export async function GET() {
     try {
         const accessToken = await getAccessToken();
-
         const playlistId = process.env.SPOTIFY_PLAYLIST_ID;
-        
+        const totalTracks = 3235; // Hardcoded for now, but you could fetch this dynamically
+
         if (!playlistId) {
             console.error('SPOTIFY_PLAYLIST_ID is not set');
             throw new Error('Spotify playlist ID is not set');
         }
 
-        console.log(`Fetching tracks for playlist: ${playlistId}`);
-        const tracks = await getAllPlaylistTracks(accessToken, playlistId);
+        console.log(`Fetching a random page of tracks for playlist: ${playlistId}`);
+        const tracks = await getRandomPlaylistPage(accessToken, playlistId, totalTracks);
+        
+        console.log(`Tracks fetched: ${tracks.length}`);
 
         if (tracks.length === 0) {
-            console.log('The playlist is empty');
-            return NextResponse.json({ error: 'The playlist is empty' }, { status: 404 });
+            console.log('No tracks found on this page');
+            return NextResponse.json({ error: 'No tracks found' }, { status: 404 });
         }
-        
-        console.log(tracks.length)
+
         const randomTrack = tracks[Math.floor(Math.random() * tracks.length)].track;
 
         if (!randomTrack) {
@@ -105,7 +103,7 @@ export async function GET() {
 
         const songInfo = {
             name: randomTrack.name,
-            artist: randomTrack.artists.map((artist: { name: string }) => artist.name).join(', '),
+            artist: randomTrack.artists.map(artist => artist.name).join(', '),
             album: randomTrack.album.name,
             releaseDate: randomTrack.album.release_date,
             previewUrl: randomTrack.preview_url,
