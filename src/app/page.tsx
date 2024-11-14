@@ -30,6 +30,20 @@ export default function Home() {
                     Try it
                   </Button>
                 </li>
+                <li>
+                  <code className="bg-muted px-1 py-0.5 rounded">/api/demo</code> - Returns the execution logs of a
+                  Vercel Function
+                  <Button variant="link" className="ml-2 text-sm" onClick={() => window.open('/api/demo', '_blank')}>
+                    Try it
+                  </Button>
+                </li>
+                <li>
+                  <code className="bg-muted px-1 py-0.5 rounded">/api/random-song</code> - Returns a song recommendation 
+                  based on a large Spotify playlist.
+                  <Button variant="link" className="ml-2 text-sm" onClick={() => window.open('/api/random-song', '_blank')}>
+                    Try it
+                  </Button>
+                </li>
                 {/* Add more endpoints here as you create them */}
               </ul>
             </section>
