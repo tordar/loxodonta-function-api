@@ -1,0 +1,6 @@
+Future Plans
+Some possibilities include:
+
+Adding authentication for private endpoints
+Integrating with external services or databases
+Creating endpoints for personal projects or data analysis

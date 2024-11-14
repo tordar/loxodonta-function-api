@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'My Personal API',
+  title: 'Loxodonta API',
   description: 'A simple, personal API built with Next.js and Vercel Functions',
 }
 

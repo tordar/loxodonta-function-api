@@ -58,17 +58,6 @@ export default function Home() {
                 .then(data =&gt; console.log(data))
             </pre>
             </section>
-            <section>
-              <h2 className="text-xl font-semibold mb-2">Future Plans</h2>
-              <p>
-                Some possibilities include:
-              </p>
-              <ul className="list-disc list-inside">
-                <li>Adding authentication for private endpoints</li>
-                <li>Integrating with external services or databases</li>
-                <li>Creating endpoints for personal projects or data analysis</li>
-              </ul>
-            </section>
           </CardContent>
         </Card>
       </main>
