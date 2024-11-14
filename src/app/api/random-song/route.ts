@@ -1,13 +1,29 @@
 import { NextResponse } from 'next/server';
-import SpotifyWebApi from 'spotify-web-api-node';
-
-const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_CLIENT_ID,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    redirectUri: 'http://localhost:3000'
-});
 
 export const runtime = 'edge';
+
+interface SpotifyArtist {
+    name: string;
+}
+
+interface SpotifyAlbum {
+    name: string;
+    release_date: string;
+}
+
+interface SpotifyTrack {
+    name: string;
+    artists: SpotifyArtist[];
+    album: SpotifyAlbum;
+    preview_url: string | null;
+    external_urls: {
+        spotify: string;
+    };
+}
+
+interface PlaylistTrack {
+    track: SpotifyTrack;
+}
 
 async function getAccessToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -37,7 +53,7 @@ async function getAccessToken() {
 
 
 async function getAllPlaylistTracks(accessToken: string, playlistId: string) {
-    let tracks: any[] = [];
+    let tracks: PlaylistTrack[] = [];
     let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
 
     while (url) {
