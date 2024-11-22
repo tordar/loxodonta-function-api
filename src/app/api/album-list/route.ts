@@ -50,12 +50,14 @@ async function getSavedAlbums(accessToken: string): Promise<SavedAlbum[]> {
     return allAlbums;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('spotifyAccessToken')?.value;
 
     if (!accessToken) {
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/spotify`);
+        const currentUrl = new URL(request.url);
+        const encodedReturnUrl = encodeURIComponent(currentUrl.pathname + currentUrl.search);
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/spotify?state=${encodedReturnUrl}`);
     }
 
     try {

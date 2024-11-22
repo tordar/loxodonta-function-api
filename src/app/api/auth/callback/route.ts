@@ -8,6 +8,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
+    const state = searchParams.get('state') || '/';
 
     if (!code) {
         return NextResponse.redirect(`${BASE_URL}/error?message=Missing+authorization+code`);
@@ -39,7 +40,8 @@ export async function GET(request: Request) {
             return NextResponse.redirect(`${BASE_URL}/error?message=${encodeURIComponent(tokenData.error)}`);
         }
 
-        const response = NextResponse.redirect(`${BASE_URL}`);
+        const redirectUrl = `${BASE_URL}${state}`;
+        const response = NextResponse.redirect(redirectUrl);
         response.cookies.set('spotifyAccessToken', tokenData.access_token, {
             httpOnly: true,
             maxAge: tokenData.expires_in,

@@ -2,19 +2,18 @@ import { NextResponse } from 'next/server';
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/callback`;
-const SCOPE = 'user-library-read';
+const SCOPES = ['user-library-read'];
 
-export async function GET() {
-    if (!CLIENT_ID) {
-        console.error('SPOTIFY_CLIENT_ID is not set');
-        return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const state = searchParams.get('state') || '/';
 
     const queryParams = new URLSearchParams({
         response_type: 'code',
-        client_id: CLIENT_ID,
-        scope: SCOPE,
+        client_id: CLIENT_ID!,
+        scope: SCOPES.join(' '),
         redirect_uri: REDIRECT_URI,
+        state: state
     });
 
     return NextResponse.redirect(`https://accounts.spotify.com/authorize?${queryParams.toString()}`);
