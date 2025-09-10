@@ -21,30 +21,64 @@ interface SavedAlbum {
 }
 
 async function getSavedAlbums(accessToken: string): Promise<SavedAlbum[]> {
-    let allAlbums: SavedAlbum[] = [];
-    let url = 'https://api.spotify.com/v1/me/albums?limit=50';
-    let totalAlbums = 0;
+    // First, get the total count and first batch
+    const firstResponse = await fetch('https://api.spotify.com/v1/me/albums?limit=50', {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+        },
+    });
 
-    while (url) {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
+    const firstData = await firstResponse.json();
+    if ('error' in firstData) {
+        throw new Error(`Failed to get saved albums: ${firstData.error.message}`);
+    }
+
+    const totalAlbums = firstData.total;
+    const totalPages = Math.ceil(totalAlbums / 50);
+    
+    console.log(`Total albums: ${totalAlbums}, Total pages: ${totalPages}`);
+
+    // If only one page, return immediately
+    if (totalPages === 1) {
+        return firstData.items;
+    }
+
+    // Create array of all page URLs
+    const pageUrls: string[] = [];
+    for (let i = 1; i < totalPages; i++) {
+        pageUrls.push(`https://api.spotify.com/v1/me/albums?limit=50&offset=${i * 50}`);
+    }
+
+    const batchSize = 10; // Process 10 pages at a time
+    const allAlbums: SavedAlbum[] = [...firstData.items];
+    
+    for (let i = 0; i < pageUrls.length; i += batchSize) {
+        const batch = pageUrls.slice(i, i + batchSize);
+        
+        const batchPromises = batch.map(async (url) => {
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            const data = await response.json();
+            if ('error' in data) {
+                throw new Error(`Failed to get saved albums: ${data.error.message}`);
+            }
+            return data.items;
         });
 
-        const data = await response.json();
-        if ('error' in data) {
-            throw new Error(`Failed to get saved albums: ${data.error.message}`);
+        const batchResults = await Promise.all(batchPromises);
+        for (const items of batchResults) {
+            allAlbums.push(...items);
         }
 
-        allAlbums = allAlbums.concat(data.items);
-        url = data.next;
-
-        if (totalAlbums === 0) {
-            totalAlbums = data.total;
+        console.log(`Fetched ${allAlbums.length} of ${totalAlbums} albums (batch ${Math.floor(i / batchSize) + 1})`);
+        
+        // Small delay between batches to respect rate limits
+        if (i + batchSize < pageUrls.length) {
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
-
-        console.log(`Fetched ${allAlbums.length} of ${totalAlbums} albums`);
     }
 
     return allAlbums;
@@ -76,15 +110,12 @@ export async function GET(request: Request) {
             addedAt: item.added_at,
         }));
 
-        const finalResponse = JSON.stringify({
+        return NextResponse.json({
             totalAlbums: albumList.length,
             albums: albumList
-        }, null, 2);  // Pretty print JSON
-
-        return new Response(finalResponse, {
+        }, {
             headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
+                'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
             },
         });
     } catch (error) {
