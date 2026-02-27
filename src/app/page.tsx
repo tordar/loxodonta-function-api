@@ -71,6 +71,18 @@ const endpoints: ApiEndpoint[] = [
         description: "Unauthorized - User not authenticated with Spotify"
       }
     ]
+  },
+  {
+    name: "Ezbookkeeping / bank callback relay",
+    description: "Public callback for bank OAuth. Receives redirect from the bank (code, state in query) and redirects the browser to your local dev backend. Use as stable redirect URI in bank/Ezbookkeeping config.",
+    path: "/api/ezbookkeeping-callback",
+    method: "GET",
+    responses: [
+      {
+        status: 302,
+        description: "Redirect to EZBOOKKEEPING_CALLBACK_TARGET (default: http://localhost:8080/api/bank_integration/callback) with same query string"
+      }
+    ]
   }
 ]
 
