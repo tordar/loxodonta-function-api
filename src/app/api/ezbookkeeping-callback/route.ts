@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server';
  *
  * Optional env: EZBOOKKEEPING_CALLBACK_TARGET (default: http://localhost:8080/api/bank_integration/callback)
  */
-const DEFAULT_TARGET = 'http://localhost:8080/api/bank_integration/callback';
+const DEFAULT_TARGET = 'http://100.72.135.76:8080/api/bank_integration/callback';
 
 export async function GET(request: Request) {
   const targetBase =
