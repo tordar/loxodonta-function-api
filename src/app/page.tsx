@@ -73,14 +73,26 @@ const endpoints: ApiEndpoint[] = [
     ]
   },
   {
-    name: "Ezbookkeeping / bank callback relay",
-    description: "Public callback for bank OAuth. Receives redirect from the bank (code, state in query) and redirects the browser to your local dev backend. Use as stable redirect URI in bank/Ezbookkeeping config.",
+    name: "Ezbookkeeping / bank callback relay (prod)",
+    description: "Production callback for bank OAuth. Receives redirect from the bank and redirects to production backend. Use in production config: enablebanking_callback_url = https://api.tordar.no/api/ezbookkeeping-callback",
     path: "/api/ezbookkeeping-callback",
     method: "GET",
     responses: [
       {
         status: 302,
-        description: "Redirect to EZBOOKKEEPING_CALLBACK_TARGET (default: http://localhost:8080/api/bank_integration/callback) with same query string"
+        description: "Redirect to production backend with same query string"
+      }
+    ]
+  },
+  {
+    name: "Ezbookkeeping / bank callback relay (dev)",
+    description: "Dev-only callback: always redirects to localhost (or EZBOOKKEEPING_DEV_TARGET). Register https://api.tordar.no/api/ezbookkeeping-callback-dev in Enable Banking; set enablebanking_callback_url = https://api.tordar.no/api/ezbookkeeping-callback-dev in conf/ezbookkeeping.dev.ini.",
+    path: "/api/ezbookkeeping-callback-dev",
+    method: "GET",
+    responses: [
+      {
+        status: 302,
+        description: "Redirect to http://localhost:8080/api/bank_integration/callback (or EZBOOKKEEPING_DEV_TARGET) with same query string"
       }
     ]
   }
